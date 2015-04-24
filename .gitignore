@@ -1,1 +1,6 @@
 *~
+.cproject
+.project
+.settings
+obj
+optim_clavier

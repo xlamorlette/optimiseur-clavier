@@ -11,3 +11,6 @@ Ce programme est écrit en C++ :
 * Il utilise la bibliothèque Boost. Le développement a été fait avec avec la version 1.54.0 (obtenue sous Ubuntu via `apt-get install libboost-all-dev`).
 
 Pour compiler le programme, lancez simplement la commande `make`.
+
+Note : si les lettres accentuees dans un fichier de statistiques ne sont pas reconnues correctement par le programme, il peut etre utile de le transformer en UTF8 comme suit :
+iconv frequences_lettres.txt -f iso-8859-1 -t UTF-8 -o frequences_lettres.txt
