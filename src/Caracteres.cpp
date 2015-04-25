@@ -2,7 +2,6 @@
 
 #include <boost/algorithm/string.hpp>
 
-
 using namespace std;
 
 boost::bimap<std::array<int, 2>, char> Caracteres::TableNormalisation;
@@ -73,5 +72,19 @@ void Caracteres::Denormalise(std::string & ioChaine)
     if (ioChaine.length() <= 0)
     {
         return;
+    }
+
+    size_t pos = 0;
+    while (pos < ioChaine.length())
+    {
+        boost::bimap<std::array<int, 2>, char>::right_map::const_iterator iterateur =
+                TableNormalisation.right.find(ioChaine[pos]);
+        if (iterateur != TableNormalisation.right.end())
+        {
+            ioChaine[pos] = static_cast<char>(iterateur->second[0]);
+            pos++;
+            ioChaine.insert(pos, 1, static_cast<char>(iterateur->second[1]));
+        }
+        pos++;
     }
 }

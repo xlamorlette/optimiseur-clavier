@@ -33,6 +33,19 @@ class Statistiques
 
         //! Statistiques d'apparation des bigrammes (normalisées pour un total à 1000)
         std::map<std::array<char, 2>, int> _bigrammes;
+
+        //! Sommes totales des fréquences des caractères et des bigrammes
+        int _sommeFrequencesCaracteres{0};
+        int _sommeFrequencesBigrammes{0};
+
+        //! Méthode appelée par le constructeur pour extraire les statistiques depuis des fichiers
+        void litFichiers(std::vector<std::string> & iFichiers);
+
+        //! Méthode appelée par le constructeur pour normaliser les fréquences afin que leurs sommes soient 1000
+        /*!
+         * Étant donné les erreurs d'arrondis, on calcule également les sommes exactes des fréquences, après normalisation
+         */
+        void normaliseFrequences();
 };
 
 #endif

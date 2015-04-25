@@ -10,6 +10,12 @@ using namespace std;
 
 Statistiques::Statistiques(vector<string> & iFichiers)
 {
+    litFichiers(iFichiers);
+    normaliseFrequences();
+}
+
+void Statistiques::litFichiers(vector<string> & iFichiers)
+{
     for (const auto & nomFichier: iFichiers)
     {
         ifstream fichier(nomFichier);
@@ -36,7 +42,8 @@ Statistiques::Statistiques(vector<string> & iFichiers)
             string element3;
             iss >> element1 >> element2 >> element3;
             Caracteres::Normalise(element1);
-            if ((element1.length() > 2) || (element3 != ""))
+            int frequence = std::stoi(element2);
+            if ((element1.length() > 2) || (frequence < 0) || (element3 != ""))
             {
                 cerr << "Ligne invalide dans le fichier " << nomFichier << " : " << endl;
                 cerr << ligne << endl;
@@ -44,21 +51,44 @@ Statistiques::Statistiques(vector<string> & iFichiers)
             }
             if (element1.length() == 1)
             {
-                //cout << "'" << element1[0] << "' : " << (int)element1[0] << endl;
-                _caracteres[element1[0]] = 1;
+                _caracteres[element1[0]] = frequence;
             }
             else
             {
-                //cout << "'" << element1 << "' : " << (int)element1[0] << " - " << (int)element1[1] << endl;
+                _bigrammes[array<char, 2>{element1[0], element1[1]}] = frequence;
             }
         }
         fichier.close();
     }
+}
 
-    //std::map<char, int> _caracteres;
-    //std::map<std::array<char, 2>, int> _bigrammes;
-    _bigrammes[array<char, 2> {'a', 'b'}] = 10;
-    _bigrammes[array<char, 2> {'a', 'c'}] = 20;
+void Statistiques::normaliseFrequences()
+{
+    // normalise les frequences d'apparition des caractères
+    int sommeAvantNormalisation = 0;
+    for (const auto & clefValeur: _caracteres)
+    {
+        sommeAvantNormalisation += clefValeur.second;
+    }
+    _sommeFrequencesCaracteres = 0;
+    for (auto & clefValeur: _caracteres)
+    {
+        clefValeur.second = static_cast<int>(static_cast<float>(clefValeur.second) * 1000 / sommeAvantNormalisation + 0.5);
+        _sommeFrequencesCaracteres += clefValeur.second;
+    }
+
+    // normalise les frequences d'apparition des bigrammes
+    sommeAvantNormalisation = 0;
+    for (const auto & clefValeur: _bigrammes)
+    {
+        sommeAvantNormalisation += clefValeur.second;
+    }
+    _sommeFrequencesBigrammes = 0;
+    for (auto & clefValeur: _bigrammes)
+    {
+        clefValeur.second = static_cast<int>(static_cast<float>(clefValeur.second) * 1000 / sommeAvantNormalisation + 0.5);
+        _sommeFrequencesBigrammes += clefValeur.second;
+    }
 }
 
 
@@ -66,9 +96,23 @@ ostream & operator << (ostream & ioStream,
         const Statistiques & iObjet)
 {
     ioStream << "caracteres :" << endl;
-    ioStream << iObjet._caracteres;
+    for (const auto & clefValeur: iObjet._caracteres)
+    {
+        string caractere{clefValeur.first};
+        Caracteres::Denormalise(caractere);
+        ioStream << "    " << caractere << " : " << clefValeur.second << endl;
+    }
+    ioStream << "    total : " << iObjet._sommeFrequencesCaracteres << endl;
+
     ioStream << "bigrammes :" << endl;
-    ioStream << iObjet._bigrammes;
+    for (const auto & clefValeur: iObjet._bigrammes)
+    {
+        std::string caractere{clefValeur.first[0]};
+        caractere += clefValeur.first[1];
+        Caracteres::Denormalise(caractere);
+        ioStream << "    " << caractere << " : " << clefValeur.second << std::endl;
+    }
+    ioStream << "    total : " << iObjet._sommeFrequencesBigrammes << endl;
     return ioStream;
 }
 

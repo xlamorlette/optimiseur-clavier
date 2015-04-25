@@ -32,7 +32,6 @@ class Caracteres
         //! Affiche le contenu des tables de normalisation et de dénormalisation
         static void AfficheTables(std::ostream & ioStream);
 
-
     private:
         //! Ajoute dans les tables de normalisation / dénormalisation un nouveau caractère
         /*
