@@ -1,8 +1,10 @@
-#include "Statistiques.hpp"
 #include "Caracteres.hpp"
+#include "Repartition.hpp"
+#include "Statistiques.hpp"
 
 #include <boost/program_options.hpp>
 #include <fcntl.h>
+#include <stdexcept>
 
 using namespace std;
 namespace po = boost::program_options;
@@ -13,13 +15,17 @@ int main(int argc,
     try
     {
         vector<string> fichiersStatistiques;
+        int choixRepartitionInitiale;
         po::options_description optionsDescription("Options autorisees");
         optionsDescription.add_options()
                 ("aide,a", "aide sur les options")
                 ("debogage,d", "active le mode d\u00E9bogage")
                 ("statistiques,s", po::value<vector<string>>(&fichiersStatistiques)->multitoken()->required(),
-                        "fichiers contenant les statistiques d'apparition des lettres et des bigrammes " \
-                        "(peut importe le nombre de fichiers, leur ordre et si les contenus sont melanges)");
+                        "fichiers contenant les statistiques d'apparition des caract\u00E8res et des bigrammes " \
+                        "(peut importe le nombre de fichiers, leur ordre et si les contenus sont melang\u00E9s)")
+                ("initiale,i", po::value<int>(&choixRepartitionInitiale)->default_value(1), "r\u00E9partition initiale :\n" \
+                        "1 : dans l'ordre d'apparition des caract\u00E8res dans les statistiques, alternativement dans chaque main\n" \
+                        "2 : \u00E9quilibrage simple selon les statistiques d'apparition des caract\u00E8res");
 
         po::variables_map variablesMap;
         po::store(po::parse_command_line(argc, argv, optionsDescription), variablesMap);
@@ -32,6 +38,7 @@ int main(int argc,
 
         po::notify(variablesMap);
         bool debogage = variablesMap.count("debogage") ? true : false;
+
         Statistiques stats(fichiersStatistiques);
         if (debogage)
         {
@@ -40,6 +47,26 @@ int main(int argc,
             cout << "Statistiques : " << endl;
             cout << stats;
         }
+
+        Repartition * pRepartitionInitiale;
+        switch (choixRepartitionInitiale)
+        {
+            case 1:
+                pRepartitionInitiale = new Repartition(stats, false);
+                break;
+            case 2:
+                pRepartitionInitiale = new Repartition(stats);
+                break;
+            default:
+                throw logic_error("Valeur invalide pour le choix de la r\u00E9partition initiale");
+        }
+
+        if (debogage)
+        {
+            cout << *pRepartitionInitiale;
+        }
+
+        cout << "score : " << pRepartitionInitiale->score() << " / " << stats.sommeTotale() << endl;
     }
     catch (exception & exception)
     {

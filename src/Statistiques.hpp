@@ -27,6 +27,37 @@ class Statistiques
          */
         Statistiques(std::vector<std::string> & iFichiers);
 
+        const std::map<char, int> & statistiquesCaracteres() const
+        {
+            return _caracteres;
+        }
+
+        int frequenceCaractere(char iCaractere) const
+        {
+            return _caracteres.at(iCaractere);
+        }
+
+        const std::map<std::array<char, 2>, int> & statistiquesBigrammes() const
+        {
+            return _bigrammes;
+        }
+
+        int sommeFrequencesCaracteres() const
+        {
+            return _sommeFrequencesCaracteres;
+        }
+
+        int sommeFrequencesBigrammes() const
+        {
+            return _sommeFrequencesBigrammes;
+        }
+
+        int sommeTotale() const
+        {
+            return _sommeFrequencesCaracteres + _sommeFrequencesBigrammes;
+        }
+
+
     private:
         //! Statistiques d'apparation des caractères (normalisées pour un total à 1000)
         std::map<char, int> _caracteres;

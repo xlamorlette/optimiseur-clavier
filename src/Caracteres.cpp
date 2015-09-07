@@ -77,8 +77,7 @@ void Caracteres::Denormalise(std::string & ioChaine)
     size_t pos = 0;
     while (pos < ioChaine.length())
     {
-        boost::bimap<std::array<int, 2>, char>::right_map::const_iterator iterateur =
-                TableNormalisation.right.find(ioChaine[pos]);
+        boost::bimap<std::array<int, 2>, char>::right_map::const_iterator iterateur = TableNormalisation.right.find(ioChaine[pos]);
         if (iterateur != TableNormalisation.right.end())
         {
             ioChaine[pos] = static_cast<char>(iterateur->second[0]);
@@ -87,4 +86,27 @@ void Caracteres::Denormalise(std::string & ioChaine)
         }
         pos++;
     }
+}
+
+
+void Caracteres::AfficheCaractereDenormalise(char iCaractere,
+        std::ostream & ioStream)
+{
+    boost::bimap<std::array<int, 2>, char>::right_map::const_iterator iterateur = TableNormalisation.right.find(iCaractere);
+    if (iterateur != TableNormalisation.right.end())
+    {
+        ioStream << static_cast<char>(iterateur->second[0]) << static_cast<char>(iterateur->second[1]);
+    }
+    else
+    {
+        ioStream << iCaractere;
+    }
+}
+
+
+void Caracteres::AfficheBigrammeDenormalise(const std::array<char, 2> & iBigramme,
+        std::ostream & ioStream)
+{
+    AfficheCaractereDenormalise(iBigramme[0], ioStream);
+    AfficheCaractereDenormalise(iBigramme[1], ioStream);
 }

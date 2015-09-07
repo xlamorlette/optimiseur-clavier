@@ -12,6 +12,12 @@ Statistiques::Statistiques(vector<string> & iFichiers)
 {
     litFichiers(iFichiers);
     normaliseFrequences();
+    // on ne gere qu'un nombre pair de caracteres a repartir entre les deux mains
+    if (_caracteres.size() % 2)
+    {
+        cerr << "Ce programme ne supporte pas un nombre impair de caracteres (" << _caracteres.size() << ")" << endl;
+        exit(-1);
+    }
 }
 
 void Statistiques::litFichiers(vector<string> & iFichiers)
@@ -98,19 +104,18 @@ ostream & operator << (ostream & ioStream,
     ioStream << "caracteres :" << endl;
     for (const auto & clefValeur: iObjet._caracteres)
     {
-        string caractere{clefValeur.first};
-        Caracteres::Denormalise(caractere);
-        ioStream << "    " << caractere << " : " << clefValeur.second << endl;
+        ioStream << "    ";
+        Caracteres::AfficheCaractereDenormalise(clefValeur.first, ioStream);
+        ioStream << " : " << clefValeur.second << endl;
     }
     ioStream << "    total : " << iObjet._sommeFrequencesCaracteres << endl;
 
     ioStream << "bigrammes :" << endl;
     for (const auto & clefValeur: iObjet._bigrammes)
     {
-        std::string caractere{clefValeur.first[0]};
-        caractere += clefValeur.first[1];
-        Caracteres::Denormalise(caractere);
-        ioStream << "    " << caractere << " : " << clefValeur.second << std::endl;
+        ioStream << "    ";
+        Caracteres::AfficheBigrammeDenormalise(clefValeur.first, ioStream);
+        ioStream << " : " << clefValeur.second << std::endl;
     }
     ioStream << "    total : " << iObjet._sommeFrequencesBigrammes << endl;
     return ioStream;

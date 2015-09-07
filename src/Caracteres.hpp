@@ -29,6 +29,14 @@ class Caracteres
          */
         static void Denormalise(std::string & ioChaine);
 
+        //! Affiche un caractère en le dénormalisant
+        static void AfficheCaractereDenormalise(char iCaractere,
+                std::ostream & ioStream);
+
+        //! Affiche un bigramme en le dénormalisant
+        static void AfficheBigrammeDenormalise(const std::array<char, 2> & iBigramme,
+                std::ostream & ioStream);
+
         //! Affiche le contenu des tables de normalisation et de dénormalisation
         static void AfficheTables(std::ostream & ioStream);
 
