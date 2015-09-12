@@ -158,7 +158,7 @@ void Repartition::calculeScore()
 }
 
 
-int Repartition::score()
+int Repartition::score() const
 {
     if (! _scoresAJour)
     {

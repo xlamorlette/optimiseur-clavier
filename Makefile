@@ -1,6 +1,6 @@
 # Optimiseur clavier
 
-# Repertoires
+# Répertoires
 OBJ_DIR	:= obj
 SRC_DIR := src
 
@@ -16,13 +16,13 @@ OS		:= $(shell uname -s)
 # Include flags
 INC_FLAGS	:=
 
-# Flags pre-processeur et compilateur
+# Flags pré-processeur et compilateur
 CPP_FLAGS	:=
 CXX_OPTIM	= -O2
 CXX_DEBUG	= 
 CXX_FLAGS	= -std=c++11 $(CXX_OPTIM) $(CXX_DEBUG) -Wall $(INC_FLAGS)
 
-# Bibliotheques
+# Bibliothèques
 LIBS	:= -lboost_program_options
 
 # Sources
@@ -44,13 +44,15 @@ clean:
 	rm -rf core $(OBJ_DIR) $(BIN)
 
 
-# Regles d'inference
+# Règles d'inférence
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@$(ECHO) $(B)"Compile: $< "$(b)
 	g++ $(CXX_FLAGS) $(CPP_FLAGS) -c -o $@ $<
 
-# Dependances
+# Dépendances
 $(BIN): $(OBJS)
 	@$(ECHO) $(B)"Link: $@ "$(b)
 	g++ -o $@ $(OBJS) $(LIBS)
+
+# Note : les dépendances par rapport aux fichiers headers ne sont pas gérées

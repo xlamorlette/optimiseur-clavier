@@ -1,14 +1,14 @@
 # optimiseur-clavier
 Programme calculant la disposition optimale des touches sur un clavier.
 
-Ce programme prend en entrÃ©e un fichier contenant les frÃ©quences d'apparition des lettres et des bigrammes les plus frÃ©quents (frÃ©quences normalisÃ©es et exprimÃ©es en pour mille), et en dÃ©duit la rÃ©partition optimale des touches entre les deux mains en maximisant l'Ã©quilibre et l'alternance entre les deux mains.
+Ce programme prend en entrée un fichier contenant les fréquences d'apparition des lettres et des bigrammes les plus fréquents (fréquences normalisées et exprimées en pour mille), et en déduit la répartition optimale des touches entre les deux mains en maximisant l'équilibre et l'alternance entre les deux mains.
 
-Les explications dÃ©taillÃ©es du contexte et de l'algorithme sont sur la page suivante : http://www.xavierlamorlette.fr/clavier.
+Les explications détaillées du contexte et de l'algorithme sont sur la page suivante : http://www.xavierlamorlette.fr/clavier.
 
-Ce programme est Ã©crit en C++ :
+Ce programme est écrit en C++ :
 
-* Il utilise certaines nouvelles fonctionnalitÃ©s de C++11. Le dÃ©veloppement a Ã©tÃ© fait avec gcc 4.8.2 (compilateur fournit avec Ubuntu 14.04).
-* Il utilise la bibliothÃ¨que Boost. Le dÃ©veloppement a Ã©tÃ© fait avec avec la version 1.54.0 (obtenue sous Ubuntu via `apt-get install libboost-all-dev`).
+* Il utilise certaines nouvelles fonctionnalités de C++11. Le développement a été fait avec gcc 4.8.2 (compilateur fournit avec Ubuntu 14.04).
+* Il utilise la bibliothèque Boost. Le développement a été fait avec avec la version 1.54.0 (obtenue sous Ubuntu via `apt-get install libboost-all-dev`).
 
 Pour compiler le programme, lancez simplement la commande `make`.
 

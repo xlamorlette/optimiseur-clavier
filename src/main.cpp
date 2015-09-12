@@ -1,4 +1,5 @@
 #include "Caracteres.hpp"
+#include "Optimisation.hpp"
 #include "Repartition.hpp"
 #include "Statistiques.hpp"
 
@@ -8,6 +9,7 @@
 
 using namespace std;
 namespace po = boost::program_options;
+
 
 int main(int argc,
         char **argv)
@@ -39,6 +41,7 @@ int main(int argc,
         po::notify(variablesMap);
         bool debogage = variablesMap.count("debogage") ? true : false;
 
+        // --- analyse les fichiers de statistiques ---
         Statistiques stats(fichiersStatistiques);
         if (debogage)
         {
@@ -48,25 +51,29 @@ int main(int argc,
             cout << stats;
         }
 
-        Repartition * pRepartitionInitiale;
+        // --- crée la répartition initiale ---
+        Repartition * pRepartition;
         switch (choixRepartitionInitiale)
         {
             case 1:
-                pRepartitionInitiale = new Repartition(stats, false);
+                pRepartition = new Repartition(stats, false);
                 break;
             case 2:
-                pRepartitionInitiale = new Repartition(stats);
+                pRepartition = new Repartition(stats);
                 break;
             default:
                 throw logic_error("Valeur invalide pour le choix de la r\u00E9partition initiale");
         }
-
         if (debogage)
         {
-            cout << *pRepartitionInitiale;
+            cout << *pRepartition;
         }
+        cout << "score : " << pRepartition->score() << " / " << stats.sommeTotale() << endl;
 
-        cout << "score : " << pRepartitionInitiale->score() << " / " << stats.sommeTotale() << endl;
+        // --- lance l'optimisation ---
+        Optimisation::optimise(*pRepartition, debogage);
+
+        cout << "\nR\u00E9partition finale :\n" << *pRepartition;
     }
     catch (exception & exception)
     {

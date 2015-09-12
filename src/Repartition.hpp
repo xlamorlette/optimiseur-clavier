@@ -10,16 +10,16 @@ class Statistiques;
 //! Classe contenant une répartition des touches entre les deux mains
 class Repartition
 {
+        friend std::ostream & operator << (std::ostream & ioStream,
+            const Repartition & iObjet);
+
+    public:
         enum class Main
         {
                 GAUCHE,
                 DROITE
         };
 
-        friend std::ostream & operator << (std::ostream & ioStream,
-            const Repartition & iObjet);
-
-    public:
         Repartition() = delete;
         Repartition & operator = (const Repartition &) = delete;
         Repartition(const Repartition &) = delete;
@@ -36,16 +36,29 @@ class Repartition
 
         virtual ~Repartition() = default;
 
+        //! Recalcule les scores partiels
+        void calculeScore();
+
         //! Retourne le score total
         /*!
          * \throw Une exception std::logic_error si le score n'est pas à jour
          */
-        int score();
+        int score() const;
+
+        //! Retourne la répartition des caractères
+        const std::map<char, Main> & donnees() const
+        {
+            return _repartition;
+        }
+
+        //! Retourn les statistiques
+        const Statistiques & statistiques() const
+        {
+            return *_pStatistiques;
+        }
+
 
     private:
-        //! Recalcule les scores partiels
-        void calculeScore();
-
         //! Répartition des caractères entre les deux mains
         std::map<char, Main> _repartition;
 
