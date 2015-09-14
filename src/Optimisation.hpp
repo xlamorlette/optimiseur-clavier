@@ -7,7 +7,7 @@ class Repartition;
 class Optimisation
 {
     public:
-        static void optimise(Repartition & ioRepartition,
+        static void ProcheEnProche(Repartition & ioRepartition,
                 bool iDebogage = false);
 };
 

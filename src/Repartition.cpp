@@ -10,9 +10,13 @@
 using namespace std;
 
 
-Repartition::Repartition(const Statistiques & iStatistiques,
-        bool iRepartitionEquilibree):
+Repartition::Repartition(const Statistiques & iStatistiques):
         _pStatistiques{&iStatistiques}
+{
+}
+
+
+void Repartition::Initialise(bool iRepartitionEquilibree)
 {
     if (iRepartitionEquilibree)
     {
@@ -129,6 +133,25 @@ ostream & operator << (ostream & ioStream,
 }
 
 
+void Repartition::verifieRepartitionComplete() const
+{
+    if (_repartition.size() != _pStatistiques->statistiquesCaracteres().size())
+    {
+        throw logic_error("Repartition incomplete");
+    }
+    array<int, 2> nbLettresParMain{0, 0};
+    for (const auto & clefValeur: _repartition)
+    {
+        int indexMain = (clefValeur.second == Repartition::Main::GAUCHE) ? 0 : 1;
+        nbLettresParMain[indexMain] ++;
+    }
+    if (nbLettresParMain[0] != nbLettresParMain[1])
+    {
+        throw logic_error("Repartition desequilibree");
+    }
+}
+
+
 void Repartition::calculeScore()
 {
     // score de répartition des caractères entre les deux mains
@@ -167,3 +190,16 @@ int Repartition::score() const
     return _scoreRepartitionCaracteres + _scoreRepartitionBigrammes;
 }
 
+
+bool Repartition::intervertitCaracteres(char caractere1,
+        char caractere2)
+{
+    if (_repartition.at(caractere1) == _repartition.at(caractere2))
+    {
+        return false;
+    }
+    Main mainInitiale = _repartition.at(caractere1);
+    _repartition[caractere1] = _repartition.at(caractere2);
+    _repartition[caractere2] = mainInitiale;
+    return true;
+}

@@ -18,6 +18,7 @@ int main(int argc,
     {
         vector<string> fichiersStatistiques;
         int choixRepartitionInitiale;
+        int choixAlgorithme;
         po::options_description optionsDescription("Options autorisees");
         optionsDescription.add_options()
                 ("aide,a", "aide sur les options")
@@ -25,6 +26,9 @@ int main(int argc,
                 ("statistiques,s", po::value<vector<string>>(&fichiersStatistiques)->multitoken()->required(),
                         "fichiers contenant les statistiques d'apparition des caract\u00E8res et des bigrammes " \
                         "(peut importe le nombre de fichiers, leur ordre et si les contenus sont melang\u00E9s)")
+                ("algorithme,g", po::value<int>(&choixAlgorithme)->default_value(1), "algorithme d'optimisation :\n" \
+                        "1 : recherche de proche en proche \u00E0 partir d'une r\u00E9partition initiale\n"
+                        "2 : recherche exhaustive")
                 ("initiale,i", po::value<int>(&choixRepartitionInitiale)->default_value(1), "r\u00E9partition initiale :\n" \
                         "1 : dans l'ordre d'apparition des caract\u00E8res dans les statistiques, alternativement dans chaque main\n" \
                         "2 : \u00E9quilibrage simple selon les statistiques d'apparition des caract\u00E8res");
@@ -51,29 +55,35 @@ int main(int argc,
             cout << stats;
         }
 
-        // --- crée la répartition initiale ---
-        Repartition * pRepartition;
-        switch (choixRepartitionInitiale)
+        Repartition repartition(stats);
+
+        switch (choixAlgorithme)
         {
             case 1:
-                pRepartition = new Repartition(stats, false);
                 break;
             case 2:
-                pRepartition = new Repartition(stats);
+                // --- crée la répartition initiale ---
+                switch (choixRepartitionInitiale)
+                {
+                    case 1:
+                        repartition.Initialise(false);
+                        break;
+                    case 2:
+                        repartition.Initialise(true);
+                        break;
+                    default:
+                        throw logic_error("Valeur invalide pour le choix de la r\u00E9partition initiale");
+                }
+                cout << "\nR\u00E9partition initiale :\n" << repartition;
+
+                // --- lance l'optimisation ---
+                Optimisation::ProcheEnProche(repartition, debogage);
+
+                cout << "\nR\u00E9partition finale :\n" << repartition;
                 break;
             default:
-                throw logic_error("Valeur invalide pour le choix de la r\u00E9partition initiale");
+                throw logic_error("Valeur invalide pour le choix de l'algorithme");
         }
-        if (debogage)
-        {
-            cout << *pRepartition;
-        }
-        cout << "score : " << pRepartition->score() << " / " << stats.sommeTotale() << endl;
-
-        // --- lance l'optimisation ---
-        Optimisation::optimise(*pRepartition, debogage);
-
-        cout << "\nR\u00E9partition finale :\n" << *pRepartition;
     }
     catch (exception & exception)
     {
