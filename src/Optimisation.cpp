@@ -7,8 +7,24 @@
 using namespace std;
 
 void Optimisation::ProcheEnProche(Repartition & ioRepartition,
+        int iChoixRepartitionInitiale,
         bool iDebogage)
 {
+    // répartition initiale
+    switch (iChoixRepartitionInitiale)
+    {
+        case 1:
+            ioRepartition.Initialise(false);
+            break;
+        case 2:
+            ioRepartition.Initialise(true);
+            break;
+        default:
+            throw logic_error("Valeur invalide pour le choix de la r\u00E9partition initiale");
+    }
+    cout << "\nR\u00E9partition initiale :\n" << ioRepartition;
+
+    // recherche de proche en proche
     int scoreReference = ioRepartition.score();
     const auto & statistiquesCaracteres = ioRepartition.statistiques().statistiquesCaracteres();
     bool auMoinsUneInversion = true;
@@ -65,4 +81,10 @@ void Optimisation::ProcheEnProche(Repartition & ioRepartition,
         }
         nombreBoucles ++;
     }
+}
+
+
+void Optimisation::Exhaustif(Repartition & ioRepartition,
+        bool iDebogage)
+{
 }

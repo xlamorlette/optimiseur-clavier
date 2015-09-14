@@ -8,6 +8,10 @@ class Optimisation
 {
     public:
         static void ProcheEnProche(Repartition & ioRepartition,
+                int iChoixRepartitionInitiale,
+                bool iDebogage = false);
+
+        static void Exhaustif(Repartition & ioRepartition,
                 bool iDebogage = false);
 };
 

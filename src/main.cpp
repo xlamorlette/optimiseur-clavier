@@ -60,30 +60,17 @@ int main(int argc,
         switch (choixAlgorithme)
         {
             case 1:
+                Optimisation::Exhaustif(repartition, debogage);
                 break;
             case 2:
-                // --- crée la répartition initiale ---
-                switch (choixRepartitionInitiale)
-                {
-                    case 1:
-                        repartition.Initialise(false);
-                        break;
-                    case 2:
-                        repartition.Initialise(true);
-                        break;
-                    default:
-                        throw logic_error("Valeur invalide pour le choix de la r\u00E9partition initiale");
-                }
-                cout << "\nR\u00E9partition initiale :\n" << repartition;
-
-                // --- lance l'optimisation ---
-                Optimisation::ProcheEnProche(repartition, debogage);
-
-                cout << "\nR\u00E9partition finale :\n" << repartition;
+                Optimisation::ProcheEnProche(repartition, choixRepartitionInitiale, debogage);
                 break;
             default:
                 throw logic_error("Valeur invalide pour le choix de l'algorithme");
         }
+
+
+        cout << "\nR\u00E9sultat de l'optimisation :\n" << repartition;
     }
     catch (exception & exception)
     {
