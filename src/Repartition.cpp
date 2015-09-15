@@ -13,47 +13,66 @@ using namespace std;
 Repartition::Repartition(const Statistiques & iStatistiques):
         _pStatistiques{&iStatistiques}
 {
+    // répartition bête : on prend les caractères dans l'ordre qu'ils viennent
+    Main main = Main::GAUCHE;
+    for (const auto & clefValeur: _pStatistiques->statistiquesCaracteres())
+    {
+        _repartition[clefValeur.first] = main;
+        main = (main == Main::GAUCHE) ? Main::DROITE : Main::GAUCHE;
+    }
+    calculeScore();
+}
+
+Repartition::Repartition(const Repartition & iObjet):
+        _scoreRepartitionCaracteres{iObjet._scoreRepartitionCaracteres},
+        _scoreRepartitionBigrammes{iObjet._scoreRepartitionBigrammes},
+        _scoreSubsidiaire{iObjet._scoreSubsidiaire},
+        _scoresAJour{iObjet._scoresAJour},
+        _pStatistiques{iObjet._pStatistiques}
+{
+    _repartition.insert(iObjet._repartition.begin(), iObjet._repartition.end());
 }
 
 
-void Repartition::Initialise(bool iRepartitionEquilibree)
-{
-    if (iRepartitionEquilibree)
-    {
-        // on trie d'abord les caractères par ordre décroissant de fréquence
-        vector<pair<int, char>> caracteresTries;
-        for (const auto & clefValeur: _pStatistiques->statistiquesCaracteres())
-        {
-            caracteresTries.push_back(pair<int, char>(clefValeur.second, clefValeur.first));
-        }
-        sort(caracteresTries.begin(), caracteresTries.end());
-        reverse(caracteresTries.begin(), caracteresTries.end());
+Repartition & Repartition::operator = (const Repartition & iObjet)
 
-        // puis on fait la répartition:
-        // G D D G G D D G G etc.
-        Main mainPrecedente = Main::GAUCHE;
-        Main main = Main::GAUCHE;
-        for (const auto & paire: caracteresTries)
-        {
-            _repartition[paire.second] = main;
-            if (main == mainPrecedente)
-            {
-                main = (main == Main::GAUCHE) ? Main::DROITE : Main::GAUCHE;
-            }
-            else
-            {
-                mainPrecedente = main;
-            }
-        }
-    }
-    else
+{
+    _repartition.clear();
+    _repartition.insert(iObjet._repartition.begin(), iObjet._repartition.end());
+    _scoreRepartitionCaracteres = iObjet._scoreRepartitionCaracteres;
+    _scoreRepartitionBigrammes = iObjet._scoreRepartitionBigrammes;
+    _scoreSubsidiaire = iObjet._scoreSubsidiaire;
+    _scoresAJour = iObjet._scoresAJour;
+    _pStatistiques = iObjet._pStatistiques;
+    return *this;
+}
+
+
+void Repartition::InitialisationEquilibree()
+{
+    // on trie d'abord les caractères par ordre décroissant de fréquence
+    vector<pair<int, char>> caracteresTries;
+    for (const auto & clefValeur: _pStatistiques->statistiquesCaracteres())
     {
-        // répartition bête : on prend les caractères dans l'ordre qu'ils viennent
-        Main main = Main::GAUCHE;
-        for (const auto & clefValeur: _pStatistiques->statistiquesCaracteres())
+        caracteresTries.push_back(pair<int, char>(clefValeur.second, clefValeur.first));
+    }
+    sort(caracteresTries.begin(), caracteresTries.end());
+    reverse(caracteresTries.begin(), caracteresTries.end());
+
+    // puis on fait la répartition:
+    // G D D G G D D G G etc.
+    Main mainPrecedente = Main::GAUCHE;
+    Main main = Main::GAUCHE;
+    for (const auto & paire: caracteresTries)
+    {
+        _repartition[paire.second] = main;
+        if (main == mainPrecedente)
         {
-            _repartition[clefValeur.first] = main;
             main = (main == Main::GAUCHE) ? Main::DROITE : Main::GAUCHE;
+        }
+        else
+        {
+            mainPrecedente = main;
         }
     }
     calculeScore();
@@ -129,26 +148,8 @@ ostream & operator << (ostream & ioStream,
             <<  " / " << iObjet._pStatistiques->sommeFrequencesBigrammes() << endl;
     ioStream << "    score total : " << iObjet._scoreRepartitionCaracteres + iObjet._scoreRepartitionBigrammes
             <<  " / " << iObjet._pStatistiques->sommeTotale() << endl;
+    ioStream << "    score subsidiaire : " << iObjet._scoreSubsidiaire << endl;
     return ioStream;
-}
-
-
-void Repartition::verifieRepartitionComplete() const
-{
-    if (_repartition.size() != _pStatistiques->statistiquesCaracteres().size())
-    {
-        throw logic_error("Repartition incomplete");
-    }
-    array<int, 2> nbLettresParMain{0, 0};
-    for (const auto & clefValeur: _repartition)
-    {
-        int indexMain = (clefValeur.second == Repartition::Main::GAUCHE) ? 0 : 1;
-        nbLettresParMain[indexMain] ++;
-    }
-    if (nbLettresParMain[0] != nbLettresParMain[1])
-    {
-        throw logic_error("Repartition desequilibree");
-    }
 }
 
 
@@ -157,14 +158,26 @@ void Repartition::calculeScore()
     // score de répartition des caractères entre les deux mains
     // = somme totale des fréquences - | différence entre les sommes des deux mains |`
     array<int, 2> sommeFrequencesParMain{0, 0};
+    array<int, 2> sommeFrequencesCarreesParMain{0, 0};
+    array<int, 2> nbLettresParMain{0, 0};
     for (const auto & clefValeur: _repartition)
     {
-        int indexMain = (clefValeur.second == Repartition::Main::GAUCHE) ? 0 : 1;
-        sommeFrequencesParMain[indexMain] += _pStatistiques->frequenceCaractere(clefValeur.first);
+        if (clefValeur.second == Main::NON_ASSIGNE)
+        {
+            throw logic_error("Lettre non assignee");
+        }
+        int indexMain = (clefValeur.second == Main::GAUCHE) ? 0 : 1;
+        int frequence = _pStatistiques->frequenceCaractere(clefValeur.first);
+        sommeFrequencesParMain[indexMain] += frequence;
+        sommeFrequencesCarreesParMain[indexMain] += frequence * frequence;
+        nbLettresParMain[indexMain] ++;
     }
-    _scoreRepartitionCaracteres = _pStatistiques->sommeFrequencesCaracteres()
-            - abs(sommeFrequencesParMain[0] - sommeFrequencesParMain[1]);
-
+    if (nbLettresParMain[0] != nbLettresParMain[1])
+    {
+        throw logic_error("Repartition desequilibree");
+    }
+    _scoreRepartitionCaracteres = _pStatistiques->sommeFrequencesCaracteres() - abs(sommeFrequencesParMain[0] - sommeFrequencesParMain[1]);
+    _scoreSubsidiaire = abs(sommeFrequencesCarreesParMain[0] - sommeFrequencesCarreesParMain[1]);
 
     // score de répartition des bigrammes
     // = somme des fréquences des bigrammes alternant les deux mains
@@ -191,6 +204,16 @@ int Repartition::score() const
 }
 
 
+int Repartition::scoreSubsidiaire() const
+{
+    if (! _scoresAJour)
+    {
+        throw logic_error("Score non a jour");
+    }
+    return _scoreSubsidiaire;
+}
+
+
 bool Repartition::intervertitCaracteres(char caractere1,
         char caractere2)
 {
@@ -201,5 +224,37 @@ bool Repartition::intervertitCaracteres(char caractere1,
     Main mainInitiale = _repartition.at(caractere1);
     _repartition[caractere1] = _repartition.at(caractere2);
     _repartition[caractere2] = mainInitiale;
+    _scoresAJour = false;
     return true;
+}
+
+
+void Repartition::assigneCaractere(char iCaractere,
+        Main iMain)
+{
+    _repartition[iCaractere] = iMain;
+    _scoresAJour = false;
+}
+
+
+void Repartition::reinitialise()
+{
+    for (auto & clefValeur: _repartition)
+    {
+        clefValeur.second = Main::NON_ASSIGNE;
+    }
+    _scoresAJour = false;
+}
+
+
+void Repartition::finitAssignationCaracteres(Main iMain)
+{
+    for (auto & clefValeur: _repartition)
+    {
+        if (clefValeur.second == Main::NON_ASSIGNE)
+        {
+            clefValeur.second = iMain;
+        }
+    }
+    _scoresAJour = false;
 }

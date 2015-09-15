@@ -17,31 +17,37 @@ class Repartition
         enum class Main
         {
                 GAUCHE,
-                DROITE
+                DROITE,
+                NON_ASSIGNE
         };
 
+        Repartition(const Repartition & iObjet);
+
+        Repartition & operator = (const Repartition & iObjet);
+
         Repartition() = delete;
-        Repartition & operator = (const Repartition &) = delete;
-        Repartition(const Repartition &) = delete;
+
 
         //! Constructeur faisant une répartition simple à partir des statistiques de fréquences d'apparition des caractères
         /*!
-         * On prend les caractères par ordre décroissant de fréquence d'apparition et on les assigne alternativement sur les deux mains
+         * On répartit les caractères alternativement sur les deux mains dans leur ordre d'apparition
          * \param iStatistiques statistiques à utiliser
          */
         Repartition(const Statistiques & iStatistiques);
-
 
         virtual ~Repartition() = default;
 
         //! Initialise la répartition à partir des statistiques
         /*!
-         * \param iRepartitionEquilibree si false, répartit les caractères alternativement sur les deux mains
-         * sans prendre en compte leur fréquences
+         * On prend les caractères par ordre décroissant de fréquence d'apparition et on les assigne alternativement sur les deux mains
          */
-        void Initialise(bool iRepartitionEquilibree = true);
+        void InitialisationEquilibree();
 
         //! Recalcule les scores partiels
+        /*!
+         * \throw Une exception std::logic_error si une lettre n'est pas assignée à une main
+         * ou s'il n'y a pas autant de lettres sur chaque main
+         */
         void calculeScore();
 
         //! Retourne le score total
@@ -49,12 +55,7 @@ class Repartition
          * \throw Une exception std::logic_error si le score n'est pas à jour
          */
         int score() const;
-
-        //! \throw Une exception std::logic_error si la répartition n'est pas complète
-        /*!
-         * Vérifie que toutes les lettres assignées, avec autant de lettres sur chaque main
-         */
-        void verifieRepartitionComplete() const;
+        int scoreSubsidiaire() const;
 
         //! Retourne les statistiques
         const Statistiques & statistiques() const
@@ -73,6 +74,17 @@ class Repartition
         bool intervertitCaracteres(char caractere1,
                 char caractere2);
 
+        //! Assigne un caractère à une main
+        void assigneCaractere(char iCaractere,
+                Main iMain);
+
+        //! Dé-assigne tous les caractères
+        void reinitialise();
+
+        //! Assigne tous les caractères non assignés à la main donnée
+        void finitAssignationCaracteres(Main iMain);
+
+
     private:
         //! Répartition des caractères entre les deux mains
         std::map<char, Main> _repartition;
@@ -80,6 +92,8 @@ class Repartition
         //! Scores partiels correspondant à la répartition des caractères et des bigrammes entre les mains
         int _scoreRepartitionCaracteres{0};
         int _scoreRepartitionBigrammes{0};
+        //! Score subsidiaire à minimiser : différence des carrés des fréquences entre les mains
+        int _scoreSubsidiaire{0};
 
         //! Drapeau indiquant si les scores partiels sont à jour
         bool _scoresAJour{true};

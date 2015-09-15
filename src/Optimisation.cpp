@@ -5,6 +5,8 @@
 #include "Statistiques.hpp"
 
 using namespace std;
+using namespace boost::multiprecision;
+
 
 void Optimisation::ProcheEnProche(Repartition & ioRepartition,
         int iChoixRepartitionInitiale,
@@ -14,10 +16,9 @@ void Optimisation::ProcheEnProche(Repartition & ioRepartition,
     switch (iChoixRepartitionInitiale)
     {
         case 1:
-            ioRepartition.Initialise(false);
             break;
         case 2:
-            ioRepartition.Initialise(true);
+            ioRepartition.InitialisationEquilibree();
             break;
         default:
             throw logic_error("Valeur invalide pour le choix de la r\u00E9partition initiale");
@@ -84,7 +85,91 @@ void Optimisation::ProcheEnProche(Repartition & ioRepartition,
 }
 
 
+void Optimisation::ChoisitCaractere(Repartition & ioMeilleureRepartition,
+        Repartition & ioRepartitionEnCours,
+        int iNbCaracteresChoisis,
+        int iNbCaracteresDisponibles,
+        std::map<char, int>::const_iterator itStatCar,
+        std::map<char, int>::const_iterator itStatCarEnd,
+        boost::multiprecision::uint128_t iNbTotalCombinaisons,
+        boost::multiprecision::uint128_t & ioNbCombinaisonsTestees,
+        bool iDebogage)
+{
+    int nbCaracteresAChoisir = ioRepartitionEnCours.statistiques().statistiquesCaracteres().size() / 2;
+    if (iNbCaracteresChoisis < nbCaracteresAChoisir)
+    {
+        iNbCaracteresChoisis++;
+        iNbCaracteresDisponibles--;
+        for (; (itStatCar != itStatCarEnd) && (nbCaracteresAChoisir - iNbCaracteresChoisis <= iNbCaracteresDisponibles); ++itStatCar, iNbCaracteresDisponibles--)
+        {
+            ioRepartitionEnCours.assigneCaractere(itStatCar->first, Repartition::Main::GAUCHE);
+            Optimisation::ChoisitCaractere(ioMeilleureRepartition, ioRepartitionEnCours, iNbCaracteresChoisis, iNbCaracteresDisponibles,
+                    next(itStatCar), itStatCarEnd, iNbTotalCombinaisons, ioNbCombinaisonsTestees, iDebogage);
+            ioRepartitionEnCours.assigneCaractere(itStatCar->first, Repartition::Main::NON_ASSIGNE);
+        }
+    }
+    else
+    {
+        ioNbCombinaisonsTestees++;
+        ioRepartitionEnCours.finitAssignationCaracteres(Repartition::Main::DROITE);
+        ioRepartitionEnCours.calculeScore();
+        if (iDebogage)
+        {
+            cout << ioRepartitionEnCours;
+            cout << "Nombre de combinaisons test\u00E9es : " << ioNbCombinaisonsTestees << " / " << iNbTotalCombinaisons << endl;
+        }
+        if ((ioRepartitionEnCours.score() > ioMeilleureRepartition.score())
+                || ((ioRepartitionEnCours.score() == ioMeilleureRepartition.score())
+                        && (ioRepartitionEnCours.scoreSubsidiaire() < ioMeilleureRepartition.scoreSubsidiaire())))
+        {
+            cout << "Meilleure r\u00E9partition trouv\u00E9e :\n" << ioRepartitionEnCours;
+            ioMeilleureRepartition = ioRepartitionEnCours;
+        }
+        int pourcentage = static_cast<int>(ioNbCombinaisonsTestees * 100 / iNbTotalCombinaisons);
+        int pourcentagePrecedent = static_cast<int>((ioNbCombinaisonsTestees - 1) * 100 / iNbTotalCombinaisons);
+        if (pourcentage > pourcentagePrecedent)
+        {
+            cout << "Proportion des combinaisons test\u00E9es : " << pourcentage << "%" << endl;
+        }
+    }
+}
+
+
+uint128_t factorial(int n)
+{
+   uint128_t result = 1;
+   for (int i=n; i>1; --i)
+   {
+       result *= i;
+   }
+   return result;
+}
+
+uint128_t square(uint128_t n)
+{
+    return n * n;
+}
+
 void Optimisation::Exhaustif(Repartition & ioRepartition,
         bool iDebogage)
 {
+    // pour parcourir l'ensemble des répartitions possibles :
+    // on choisit la moitié des caractères à mettre dans une main
+    // l'autre moitié est assignée à l'autre main
+    // par symétrie, on fixe le premier caractère
+
+    // nombre de combinaisons possible
+    int nbCaracteres = ioRepartition.statistiques().statistiquesCaracteres().size();
+    uint128_t nbTotalCombinaisons = factorial(nbCaracteres) / square(factorial(nbCaracteres / 2)) / 2;
+    uint128_t nbCombinaisonsTestees = 0;
+    cout << "Nombre de combinaisons \u00E0 parcourir : " << nbTotalCombinaisons << endl;
+
+    Repartition repartitionEnCours(ioRepartition);
+    repartitionEnCours.reinitialise();
+    const std::map<char, int> & statistiquesCaracteres = ioRepartition.statistiques().statistiquesCaracteres();
+    std::map<char, int>::const_iterator itStatCar = statistiquesCaracteres.begin();
+    repartitionEnCours.assigneCaractere(itStatCar->first, Repartition::Main::GAUCHE);
+    itStatCar++;
+    Optimisation::ChoisitCaractere(ioRepartition, repartitionEnCours, 1, statistiquesCaracteres.size() - 1, itStatCar, statistiquesCaracteres.end(),
+            nbTotalCombinaisons, nbCombinaisonsTestees, iDebogage);
 }
