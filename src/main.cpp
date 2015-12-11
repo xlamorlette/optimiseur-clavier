@@ -27,8 +27,8 @@ int main(int argc,
                         "fichiers contenant les statistiques d'apparition des caract\u00E8res et des bigrammes " \
                         "(peut importe le nombre de fichiers, leur ordre et si les contenus sont melang\u00E9s)")
                 ("algorithme,g", po::value<int>(&choixAlgorithme)->default_value(1), "algorithme d'optimisation :\n" \
-                        "1 : recherche de proche en proche \u00E0 partir d'une r\u00E9partition initiale\n"
-                        "2 : recherche exhaustive")
+                        "1 : recherche exhaustive\n"
+                        "2 : recherche de proche en proche \u00E0 partir d'une r\u00E9partition initiale\n")
                 ("initiale,i", po::value<int>(&choixRepartitionInitiale)->default_value(1), "r\u00E9partition initiale :\n" \
                         "1 : dans l'ordre d'apparition des caract\u00E8res dans les statistiques, alternativement dans chaque main\n" \
                         "2 : \u00E9quilibrage simple selon les statistiques d'apparition des caract\u00E8res");

@@ -4,3 +4,5 @@
 .settings
 obj
 optim_clavier
+.pydevproject
+keylogger/*.htm
