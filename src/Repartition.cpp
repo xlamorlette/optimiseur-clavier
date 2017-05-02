@@ -13,7 +13,7 @@ using namespace std;
 Repartition::Repartition(const Statistiques & iStatistiques):
         _pStatistiques{&iStatistiques}
 {
-    // répartition bête : on prend les caractères dans l'ordre qu'ils viennent
+    // rï¿½partition bï¿½te : on prend les caractï¿½res dans l'ordre qu'ils viennent
     Main main = Main::GAUCHE;
     for (const auto & clefValeur: _pStatistiques->statistiquesCaracteres())
     {
@@ -50,7 +50,7 @@ Repartition & Repartition::operator = (const Repartition & iObjet)
 
 void Repartition::InitialisationEquilibree()
 {
-    // on trie d'abord les caractères par ordre décroissant de fréquence
+    // on trie d'abord les caractï¿½res par ordre dï¿½croissant de frï¿½quence
     vector<pair<int, char>> caracteresTries;
     for (const auto & clefValeur: _pStatistiques->statistiquesCaracteres())
     {
@@ -59,7 +59,7 @@ void Repartition::InitialisationEquilibree()
     sort(caracteresTries.begin(), caracteresTries.end());
     reverse(caracteresTries.begin(), caracteresTries.end());
 
-    // puis on fait la répartition:
+    // puis on fait la rï¿½partition:
     // G D D G G D D G G etc.
     Main mainPrecedente = Main::GAUCHE;
     Main main = Main::GAUCHE;
@@ -84,7 +84,7 @@ ostream & operator << (ostream & ioStream,
 {
     ioStream << "Repartition :" << endl;
 
-    // on sépare les caractères par main, et on les trie par fréquences décroissantes
+    // on sï¿½pare les caractï¿½res par main, et on les trie par frï¿½quences dï¿½croissantes
     array<vector<pair<int, char>>, 2> mains;
     for (const auto & clefValeur: iObjet._repartition)
     {
@@ -105,8 +105,8 @@ ostream & operator << (ostream & ioStream,
         ioStream << endl;
     }
 
-    // on regarde quels sont les bigrammes sur la meme main, ou bien alternant les mains, et on les trie par fréquences décroissantes
-    // 0: même main, 1: mains différentes
+    // on regarde quels sont les bigrammes sur la meme main, ou bien alternant les mains, et on les trie par frï¿½quences dï¿½croissantes
+    // 0: mï¿½me main, 1: mains diffï¿½rentes
     array<vector<pair<array<char, 2>, int>>, 2> bigrammesParAlternance;
     for (const auto & bigramme: iObjet._pStatistiques->statistiquesBigrammes())
     {
@@ -121,7 +121,7 @@ ostream & operator << (ostream & ioStream,
     }
     for (int indexAlternance: {0, 1})
     {
-        // trie par ordre décroissant sur la deuxième valeur des paires
+        // trie par ordre dï¿½croissant sur la deuxiï¿½me valeur des paires
         sort(bigrammesParAlternance[indexAlternance].begin(), bigrammesParAlternance[indexAlternance].end(),
                 [](const pair<array<char, 2>, int> & iPremier, const pair<array<char, 2>, int> & iSecond) -> bool {
                     return iPremier.second > iSecond.second;});
@@ -155,8 +155,8 @@ ostream & operator << (ostream & ioStream,
 
 void Repartition::calculeScore()
 {
-    // score de répartition des caractères entre les deux mains
-    // = somme totale des fréquences - | différence entre les sommes des deux mains |`
+    // score de rï¿½partition des caractï¿½res entre les deux mains
+    // = somme totale des frï¿½quences - | diffï¿½rence entre les sommes des deux mains |`
     array<int, 2> sommeFrequencesParMain{0, 0};
     array<int, 2> sommeFrequencesCarreesParMain{0, 0};
     array<int, 2> nbLettresParMain{0, 0};
@@ -179,12 +179,12 @@ void Repartition::calculeScore()
     _scoreRepartitionCaracteres = _pStatistiques->sommeFrequencesCaracteres() - abs(sommeFrequencesParMain[0] - sommeFrequencesParMain[1]);
     _scoreSubsidiaire = abs(sommeFrequencesCarreesParMain[0] - sommeFrequencesCarreesParMain[1]);
 
-    // score de répartition des bigrammes
-    // = somme des fréquences des bigrammes alternant les deux mains
+    // score de rÃ©partition des bigrammes
+    // = somme des frÃ©quences des bigrammes sur une seule main
     _scoreRepartitionBigrammes = 0;
     for (const auto & bigramme: _pStatistiques->statistiquesBigrammes())
     {
-        if (_repartition.at(bigramme.first[0]) != _repartition.at(bigramme.first[1]))
+        if (_repartition.at(bigramme.first[0]) == _repartition.at(bigramme.first[1]))
         {
             _scoreRepartitionBigrammes += bigramme.second;
         }
