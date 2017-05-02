@@ -100,7 +100,7 @@ for file_name in files_names:
                         letter_count[character] += 1
                     else:
                         letter_count[character] = 1
-                    if previous_letter:
+                    if previous_letter and previous_letter != character:
                         digram = previous_letter + character
                         if args.debug:
                             print "digram: %s" % digram
